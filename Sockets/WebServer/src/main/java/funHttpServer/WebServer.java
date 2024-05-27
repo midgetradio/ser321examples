@@ -341,6 +341,72 @@ class WebServer {
             builder.append("Malformed json response.");
           }
                  
+        } else if (request.contains("attackTheDarkness?")) {
+          // This multiplies two numbers, there is NO error handling, so when
+          // wrong data is given this just crashes
+          boolean requestOk = true;
+
+          Map<String, String> query_pairs = new LinkedHashMap<String, String>();
+          // extract path parameters
+          try {
+            query_pairs = splitQuery(request.replace("attackTheDarkness?", ""));
+          } catch(Exception e) {
+            builder.append("HTTP/1.1 400 Bad Request\n");
+            builder.append("Content-Type: text/html; charset=utf-8\n");
+            builder.append("\n");
+            builder.append("I am not sure what you want me to do...");
+            requestOk = false;
+            response = builder.toString().getBytes();
+            return response;
+          }
+          if(query_pairs.size() != 2) {
+            builder.append("HTTP/1.1 400 Bad Request\n");
+            builder.append("Content-Type: text/html; charset=utf-8\n");
+            builder.append("\n");
+            builder.append("Must supply no more or less than 2 inputs.");
+            requestOk = false;
+            response = builder.toString().getBytes();
+            return response;
+          }
+
+          // extract required fields from parameters
+          String name = query_pairs.get("name");
+          String weapon = query_pairs.get("weapon");
+
+          if(name == null || weapon == null) {
+            requestOk = false;
+            builder.append("HTTP/1.1 400 Bad Request\n");
+            builder.append("Content-Type: text/html; charset=utf-8\n");
+            builder.append("\n");
+            builder.append("Must include values for parameters 'name' and 'weapon'");
+            response = builder.toString().getBytes();
+            return response;
+          }
+          
+          if(requestOk) {
+            Random random = new Random();
+            int value = random.nextInt(20) + 1;
+
+            String result = "";
+
+            if(value < 10) {
+              result = name + " attacks the darkness with a " + weapon + ", misses hilariously and is forever consumed.";
+            } else if (value >= 10 && value < 15) {
+              result = name + " attacks the darkness with a " + weapon + ", wounding it slightly. The darkness is now angry and full of vengeance.";
+            } else if (value >= 15 && value < 18) {
+              result = name + " attacks the darkness with a " + weapon + ", deeply wounding its pride. The darkness slinks off into itself, and thinks about its life.";
+            } else if (value >= 18) {
+              result = name + " attacks the darkness with a " + weapon + ", destroying it completely. There is much laughter and mountain dew.";
+            }
+
+
+            // Generate response
+            builder.append("HTTP/1.1 200 OK\n");
+            builder.append("Content-Type: text/html; charset=utf-8\n");
+            builder.append("\n");
+            builder.append(result);
+          } 
+        
         } else {
           // if the request is not recognized at all
 
