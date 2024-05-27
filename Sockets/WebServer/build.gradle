@@ -20,15 +20,15 @@ dependencies {
 }
 
 
-task SimpleWebServer(type: JavaExec) {
-  group 'http'
-  description 'Simple Http Demo'
+// task SimpleWebServer(type: JavaExec) {
+//   group 'http'
+//   description 'Simple Http Demo'
 
-  classpath = sourceSets.main.runtimeClasspath
+//   classpath = sourceSets.main.runtimeClasspath
 
-  main = 'httpServer.WebServer'
-  standardInput = System.in
-}
+//   main = 'httpServer.WebServer'
+//   standardInput = System.in
+// }
 
 task FunWebServer(type: JavaExec) {
   group 'http'
