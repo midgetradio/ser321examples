@@ -23,6 +23,10 @@ jar {
   manifest {
     attributes["Main-Class"] = "funHttpServer.WebServer"
   }
+
+  from {
+      configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+  }
 }
 
 
