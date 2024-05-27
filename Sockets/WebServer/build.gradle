@@ -4,6 +4,22 @@ apply plugin: 'application'
 //define main class
 mainClassName = 'SimpleServer'
 
+ dependencies {
+    implementation group: 'org.json', name: 'json', version: '20200518'
+}
+
+repositories {
+    flatDir {
+        name = 'libs dir'
+        dir file('lib')  
+    }
+}
+
+dependencies {
+    implementation files('lib/json.jar')  
+}
+
+
 task SimpleWebServer(type: JavaExec) {
   group 'http'
   description 'Simple Http Demo'
@@ -19,6 +35,7 @@ task FunWebServer(type: JavaExec) {
   description 'Simple Http Demo'
 
   classpath = sourceSets.main.runtimeClasspath
+
 
   main = 'funHttpServer.WebServer'
   standardInput = System.in

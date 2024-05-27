@@ -26,6 +26,8 @@ import java.util.Map;
 import java.util.LinkedHashMap;
 import java.nio.charset.Charset;
 
+import org.json.*;
+
 class WebServer {
   public static void main(String args[]) {
     WebServer server = new WebServer(9000);
@@ -262,14 +264,81 @@ class WebServer {
           //     "/repos/OWNERNAME/REPONAME/contributors"
 
           Map<String, String> query_pairs = new LinkedHashMap<String, String>();
-          query_pairs = splitQuery(request.replace("github?", ""));
+
+          // check that query_pairs is parsable
+          try {
+            query_pairs = splitQuery(request.replace("github?", ""));
+          } catch (Exception e) {
+            builder.append("HTTP/1.1 400 Bad Request\n");
+            builder.append("Content-Type: text/html; charset=utf-8\n");
+            builder.append("\n");
+            builder.append("I am not sure what you want me to do...");
+            response = builder.toString().getBytes();
+            return response;
+          }
+
+          // check for well-formed query
+          try {
+            String query = query_pairs.get("query");
+
+            int count = 0;
+            for(int i = 0; i < query.length(); i++) {
+              if(query.charAt(i) == '/') {
+                count++;
+              }
+            }
+
+            if(count != 2) {
+              builder.append("HTTP/1.1 400 Bad Request\n");
+              builder.append("Content-Type: text/html; charset=utf-8\n");
+              builder.append("\n");
+              builder.append("Malformed query.");
+              response = builder.toString().getBytes();
+              return response;
+            }
+
+          } catch(Exception e) {
+            builder.append("HTTP/1.1 400 Bad Request\n");
+            builder.append("Content-Type: text/html; charset=utf-8\n");
+            builder.append("\n");
+            builder.append("Malformed query.");
+            response = builder.toString().getBytes();
+            return response;
+          }
+          
           String json = fetchURL("https://api.github.com/" + query_pairs.get("query"));
+          // String json = "[ {'id': '1234', 'full_name': 'matt', 'owner':{'login': 'mlogin'} }, {'id': '4321', 'full_name': 'watt', 'owner':{'login': 'wlogin'} }]";
+          JSONArray jsonArray = new JSONArray(json);
+
+          StringBuilder responseJson = new StringBuilder();
+          
+          for(int i = 0; i < jsonArray.length(); i++) {
+            JSONObject jObj = (JSONObject) jsonArray.get(i);
+            responseJson.append("ID: ");
+            responseJson.append(jObj.getString("id"));
+            responseJson.append("\n");
+            responseJson.append("Full Name: ");
+            responseJson.append(jObj.getString("full_name"));
+            responseJson.append("\n");
+            JSONObject loginObj = jObj.getJSONObject("owner");
+            responseJson.append("Login: ");
+            responseJson.append(loginObj.getString("login"));
+            responseJson.append("\n");
+            responseJson.append("------\n");
+          }
+
+          System.out.println(responseJson);
+          
+          
+          // System.out.println(jObject.getString("Organization"));
           System.out.println(json);
+
+          // JSONObject obj = new JSONObject(json);
 
           builder.append("HTTP/1.1 200 OK\n");
           builder.append("Content-Type: text/html; charset=utf-8\n");
           builder.append("\n");
-          builder.append("Check the todos mentioned in the Java source file");
+          builder.append(responseJson);
           // TODO: Parse the JSON returned by your fetch and create an appropriate
           // response based on what the assignment document asks for
 
