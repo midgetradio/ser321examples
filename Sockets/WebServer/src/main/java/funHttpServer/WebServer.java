@@ -315,7 +315,7 @@ class WebServer {
           for(int i = 0; i < jsonArray.length(); i++) {
             JSONObject jObj = (JSONObject) jsonArray.get(i);
             responseJson.append("ID: ");
-            responseJson.append(jObj.getString("id"));
+            responseJson.append(jObj.getInt("id"));
             responseJson.append("\n");
             responseJson.append("Full Name: ");
             responseJson.append(jObj.getString("full_name"));
