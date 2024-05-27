@@ -35,6 +35,7 @@ class WebServer {
 
   /**
    * Main thread
+   * 
    * @param port to listen on
    */
   public WebServer(int port) {
@@ -306,42 +307,40 @@ class WebServer {
             return response;
           }
           
-          String json = fetchURL("https://api.github.com/" + query_pairs.get("query"));
-          // String json = "[ {'id': '1234', 'full_name': 'matt', 'owner':{'login': 'mlogin'} }, {'id': '4321', 'full_name': 'watt', 'owner':{'login': 'wlogin'} }]";
-          JSONArray jsonArray = new JSONArray(json);
-
-          StringBuilder responseJson = new StringBuilder();
-          
-          for(int i = 0; i < jsonArray.length(); i++) {
-            JSONObject jObj = (JSONObject) jsonArray.get(i);
-            responseJson.append("ID: ");
-            responseJson.append(jObj.getInt("id"));
-            responseJson.append("\n");
-            responseJson.append("Full Name: ");
-            responseJson.append(jObj.getString("full_name"));
-            responseJson.append("\n");
-            JSONObject loginObj = jObj.getJSONObject("owner");
-            responseJson.append("Login: ");
-            responseJson.append(loginObj.getString("login"));
-            responseJson.append("\n");
-            responseJson.append("------\n");
+          try {
+            String json = fetchURL("https://api.github.com/" + query_pairs.get("query"));
+            JSONArray jsonArray = new JSONArray(json);
+  
+            StringBuilder responseJson = new StringBuilder();
+            
+            // TODO: Parse the JSON returned by your fetch and create an appropriate
+            // response based on what the assignment document asks for
+            for(int i = 0; i < jsonArray.length(); i++) {
+              JSONObject jObj = (JSONObject) jsonArray.get(i);
+              responseJson.append("ID: ");
+              responseJson.append(jObj.getInt("id"));
+              responseJson.append("\n");
+              responseJson.append("Full Name: ");
+              responseJson.append(jObj.getString("full_name"));
+              responseJson.append("\n");
+              JSONObject loginObj = jObj.getJSONObject("owner");
+              responseJson.append("Login: ");
+              responseJson.append(loginObj.getString("login"));
+              responseJson.append("\n");
+              responseJson.append("------\n");
+            }
+  
+            builder.append("HTTP/1.1 200 OK\n");
+            builder.append("Content-Type: text/html; charset=utf-8\n");
+            builder.append("\n");
+            builder.append(responseJson);
+          } catch (Exception e) {
+            builder.append("HTTP/1.1 400 Bad Request\n");
+            builder.append("Content-Type: text/html; charset=utf-8\n");
+            builder.append("\n");
+            builder.append("Malformed json response.");
           }
-
-          System.out.println(responseJson);
-          
-          
-          // System.out.println(jObject.getString("Organization"));
-          System.out.println(json);
-
-          // JSONObject obj = new JSONObject(json);
-
-          builder.append("HTTP/1.1 200 OK\n");
-          builder.append("Content-Type: text/html; charset=utf-8\n");
-          builder.append("\n");
-          builder.append(responseJson);
-          // TODO: Parse the JSON returned by your fetch and create an appropriate
-          // response based on what the assignment document asks for
-
+                 
         } else {
           // if the request is not recognized at all
 
@@ -364,6 +363,7 @@ class WebServer {
 
   /**
    * Method to read in a query and split it up correctly
+   * 
    * @param query parameters on path
    * @return Map of all parameters and their specific values
    * @throws UnsupportedEncodingException If the URLs aren't encoded with UTF-8
@@ -384,6 +384,7 @@ class WebServer {
 
   /**
    * Builds an HTML file list from the www directory
+   * 
    * @return HTML string output of file list
    */
   public static String buildFileList() {
