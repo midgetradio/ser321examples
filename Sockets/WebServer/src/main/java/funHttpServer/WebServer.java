@@ -103,12 +103,24 @@ class WebServer {
       // example GET format: GET /index.html HTTP/1.1
 
       String request = null;
-
+      int c = 1;
       boolean done = false;
       while (!done) {
         String line = in.readLine();
 
+        if(c == 1) {
+          System.out.println("FIRST LINE");
+          if(!line.contains("HTTP")) {
+            throw new IOException("Non HTTP Request");
+          }
+        }
+
+        c++;
+
         System.out.println("Received: " + line);
+
+        
+        
 
         // find end of header("\n\n")
         if (line == null || line.equals(""))
