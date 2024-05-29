@@ -109,18 +109,13 @@ class WebServer {
         String line = in.readLine();
 
         if(c == 1) {
-          System.out.println("FIRST LINE");
-          if(!line.contains("HTTP")) {
+          if(line == null || !line.contains("HTTP")) {
             throw new IOException("Non HTTP Request");
           }
         }
-
         c++;
 
         System.out.println("Received: " + line);
-
-        
-        
 
         // find end of header("\n\n")
         if (line == null || line.equals(""))
