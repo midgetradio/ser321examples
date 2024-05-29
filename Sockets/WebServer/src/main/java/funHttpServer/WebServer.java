@@ -142,10 +142,7 @@ class WebServer {
           page = page.replace("${links}", buildFileList());
 
           // Generate response
-          builder.append("HTTP/1.1 200 OK\n");
-          builder.append("Content-Type: text/html; charset=utf-8\n");
-          builder.append("\n");
-          builder.append(page);
+          builder = buildResponse("200 OK", "text/html", page);
 
         } else if (request.equalsIgnoreCase("json")) {
           // shows the JSON of a random image and sets the header name for that image
@@ -158,9 +155,7 @@ class WebServer {
           String url = _images.get(header);
 
           // Generate response
-          builder.append("HTTP/1.1 200 OK\n");
-          builder.append("Content-Type: application/json; charset=utf-8\n");
-          builder.append("\n");
+          builder = buildResponse("200 OK", "application/json", "\n");
           builder.append("{");
           builder.append("\"header\":\"").append(header).append("\",");
           builder.append("\"image\":\"").append(url).append("\"");
@@ -173,10 +168,7 @@ class WebServer {
           File file = new File("www/index.html");
 
           // Generate response
-          builder.append("HTTP/1.1 200 OK\n");
-          builder.append("Content-Type: text/html; charset=utf-8\n");
-          builder.append("\n");
-          builder.append(new String(readFileInBytes(file)));
+          builder = buildResponse("200 OK", "text/html", new String(readFileInBytes(file)));
 
         } else if (request.contains("file/")) {
           // tries to find the specified file and shows it or shows an error
@@ -186,19 +178,17 @@ class WebServer {
 
           // Generate response
           if (file.exists()) { // success
-            builder.append("HTTP/1.1 200 OK\n");
-            builder.append("Content-Type: text/html; charset=utf-8\n");
-            builder.append("\n");
-            builder.append("Would theoretically be a file but removed this part, you do not have to do anything with it for the assignment");
+            builder = buildResponse("200 OK", "text/html", "Would theoretically be a file but removed this part, you do not have to do anything with it for the assignment");
+          
           } else { // failure
-            builder.append("HTTP/1.1 404 Not Found\n");
-            builder.append("Content-Type: text/html; charset=utf-8\n");
-            builder.append("\n");
-            builder.append("File not found: " + file);
+            builder = buildResponse("404 Not Found", "text/html", "File not found: " + file);
           }
         } else if (request.contains("multiply?")) {
           // This multiplies two numbers, there is NO error handling, so when
           // wrong data is given this just crashes
+
+          // TODO: Include error handling here with a correct error code and
+          // a response that makes sense
           boolean requestOk = true;
 
           Map<String, String> query_pairs = new LinkedHashMap<String, String>();
@@ -206,20 +196,14 @@ class WebServer {
           try {
             query_pairs = splitQuery(request.replace("multiply?", ""));
           } catch(Exception e) {
-            builder.append("HTTP/1.1 400 Bad Request\n");
-            builder.append("Content-Type: text/html; charset=utf-8\n");
-            builder.append("\n");
-            builder.append("I am not sure what you want me to do...");
+            builder = buildResponse("400 Bad Request", "text/html", "I am not sure what you want me to do...");
             requestOk = false;
             response = builder.toString().getBytes();
             return response;
           }
 
           if(query_pairs.size() != 2) {
-            builder.append("HTTP/1.1 400 Bad Request\n");
-            builder.append("Content-Type: text/html; charset=utf-8\n");
-            builder.append("\n");
-            builder.append("Must supply no more or less than 2 integers.");
+            builder = buildResponse("400 Bad Request", "text/html", "Must supply no more or less than 2 integers.");
             requestOk = false;
             response = builder.toString().getBytes();
             return response;
@@ -232,10 +216,7 @@ class WebServer {
             num1 = Integer.parseInt(query_pairs.get("num1"));
             num2 = Integer.parseInt(query_pairs.get("num2"));
           } catch (Exception e) {
-            builder.append("HTTP/1.1 400 Bad Request\n");
-            builder.append("Content-Type: text/html; charset=utf-8\n");
-            builder.append("\n");
-            builder.append("Must supply integers.");
+            builder = buildResponse("400 Bad Request", "text/html", "Must supply integers.");
             requestOk = false;
             response = builder.toString().getBytes();
             return response;
@@ -246,14 +227,10 @@ class WebServer {
             Integer result = num1 * num2;
 
             // Generate response
-            builder.append("HTTP/1.1 200 OK\n");
-            builder.append("Content-Type: text/html; charset=utf-8\n");
-            builder.append("\n");
-            builder.append("Result is: " + result);
+            builder = buildResponse("200 OK", "text/html", "Result is: " + result);
           }
 
-          // TODO: Include error handling here with a correct error code and
-          // a response that makes sense
+       
 
         } else if (request.contains("github?")) {
           // pulls the query from the request and runs it with GitHub's REST API
@@ -270,10 +247,7 @@ class WebServer {
           try {
             query_pairs = splitQuery(request.replace("github?", ""));
           } catch (Exception e) {
-            builder.append("HTTP/1.1 400 Bad Request\n");
-            builder.append("Content-Type: text/html; charset=utf-8\n");
-            builder.append("\n");
-            builder.append("I am not sure what you want me to do...");
+            builder = buildResponse("400 Bad Request", "text/html", "I am not sure what you want me to do...");
             response = builder.toString().getBytes();
             return response;
           }
@@ -290,19 +264,13 @@ class WebServer {
             }
 
             if(count != 2) {
-              builder.append("HTTP/1.1 400 Bad Request\n");
-              builder.append("Content-Type: text/html; charset=utf-8\n");
-              builder.append("\n");
-              builder.append("Malformed query.");
+              builder = buildResponse("400 Bad Request", "text/html", "Malformed query.");
               response = builder.toString().getBytes();
               return response;
             }
 
           } catch(Exception e) {
-            builder.append("HTTP/1.1 400 Bad Request\n");
-            builder.append("Content-Type: text/html; charset=utf-8\n");
-            builder.append("\n");
-            builder.append("Malformed query.");
+            builder = buildResponse("400 Bad Request", "text/html", "Malformed query.");
             response = builder.toString().getBytes();
             return response;
           }
@@ -330,15 +298,9 @@ class WebServer {
               responseJson.append("------\n");
             }
   
-            builder.append("HTTP/1.1 200 OK\n");
-            builder.append("Content-Type: text/html; charset=utf-8\n");
-            builder.append("\n");
-            builder.append(responseJson);
+            builder = buildResponse("200 OK", "text/html", responseJson.toString());
           } catch (Exception e) {
-            builder.append("HTTP/1.1 400 Bad Request\n");
-            builder.append("Content-Type: text/html; charset=utf-8\n");
-            builder.append("\n");
-            builder.append("Malformed json response.");
+            builder = buildResponse("400 Bad Request", "text/html", "Malformed json response.");
           }
                  
         } else if (request.contains("attackTheDarkness?")) {
@@ -351,19 +313,13 @@ class WebServer {
           try {
             query_pairs = splitQuery(request.replace("attackTheDarkness?", ""));
           } catch(Exception e) {
-            builder.append("HTTP/1.1 400 Bad Request\n");
-            builder.append("Content-Type: text/html; charset=utf-8\n");
-            builder.append("\n");
-            builder.append("I am not sure what you want me to do...");
+            builder = buildResponse("400 Bad Request", "text/html", "I am not sure what you want me to do...");
             requestOk = false;
             response = builder.toString().getBytes();
             return response;
           }
           if(query_pairs.size() != 2) {
-            builder.append("HTTP/1.1 400 Bad Request\n");
-            builder.append("Content-Type: text/html; charset=utf-8\n");
-            builder.append("\n");
-            builder.append("Must supply no more or less than 2 inputs.");
+            builder = buildResponse("400 Bad Request", "text/html", "Must supply no more or less than 2 inputs.");
             requestOk = false;
             response = builder.toString().getBytes();
             return response;
@@ -375,10 +331,7 @@ class WebServer {
 
           if(name == null || weapon == null) {
             requestOk = false;
-            builder.append("HTTP/1.1 400 Bad Request\n");
-            builder.append("Content-Type: text/html; charset=utf-8\n");
-            builder.append("\n");
-            builder.append("Must include values for parameters 'name' and 'weapon'");
+            builder = buildResponse("400 Bad Request", "text/html", "Must include values for parameters 'name' and 'weapon'");
             response = builder.toString().getBytes();
             return response;
           }
@@ -401,10 +354,7 @@ class WebServer {
 
 
             // Generate response
-            builder.append("HTTP/1.1 200 OK\n");
-            builder.append("Content-Type: text/html; charset=utf-8\n");
-            builder.append("\n");
-            builder.append(result);
+            builder = buildResponse("200 OK", "text/html", result);
           } 
         
         } 
@@ -419,20 +369,14 @@ class WebServer {
           try {
             query_pairs = splitQuery(request.replace("badGambler?", ""));
           } catch(Exception e) {
-            builder.append("HTTP/1.1 400 Bad Request\n");
-            builder.append("Content-Type: text/html; charset=utf-8\n");
-            builder.append("\n");
-            builder.append("I am not sure what you want me to do...");
+            builder = buildResponse("400 Bad Request", "text/html", "I am not sure what you want me to do...");
             requestOk = false;
             response = builder.toString().getBytes();
             return response;
           }
 
           if(query_pairs.size() != 2) {
-            builder.append("HTTP/1.1 400 Bad Request\n");
-            builder.append("Content-Type: text/html; charset=utf-8\n");
-            builder.append("\n");
-            builder.append("Must supply no more or less than 2 integers.");
+            builder = buildResponse("400 Bad Request", "text/html", "Must supply no more or less than 2 integers.");
             requestOk = false;
             response = builder.toString().getBytes();
             return response;
@@ -445,10 +389,7 @@ class WebServer {
             num1 = Integer.parseInt(query_pairs.get("num1"));
             num2 = Integer.parseInt(query_pairs.get("num2"));
           } catch (Exception e) {
-            builder.append("HTTP/1.1 400 Bad Request\n");
-            builder.append("Content-Type: text/html; charset=utf-8\n");
-            builder.append("\n");
-            builder.append("Must supply integers.");
+            builder = buildResponse("400 Bad Request", "text/html", "Must supply integers.");
             requestOk = false;
             response = builder.toString().getBytes();
             return response;
@@ -473,23 +414,13 @@ class WebServer {
             }
 
             // Generate response
-            builder.append("HTTP/1.1 200 OK\n");
-            builder.append("Content-Type: text/html; charset=utf-8\n");
-            builder.append("\n");
-            builder.append("Result is: " + result);
+            builder = buildResponse("200 OK", "text/html", "Result is: " + result);
           }
-
-          // TODO: Include error handling here with a correct error code and
-          // a response that makes sense
         }
         
         else {
           // if the request is not recognized at all
-
-          builder.append("HTTP/1.1 400 Bad Request\n");
-          builder.append("Content-Type: text/html; charset=utf-8\n");
-          builder.append("\n");
-          builder.append("I am not sure what you want me to do...");
+          builder = buildResponse("400 Bad Request", "text/html", "I am not sure what you want me to do...");
         }
 
         // Output
@@ -502,6 +433,22 @@ class WebServer {
 
     return response;
   }
+
+  /**
+   * Method to build a string response
+   */
+  public StringBuilder buildResponse(String statusCode, String contentType, String responseMessage) {
+    StringBuilder builder = new StringBuilder();
+    builder.append("HTTP/1.1 ");
+    builder.append(statusCode + "\n");
+    builder.append("Content-Type: ");
+    builder.append(contentType + "; charset=utf-8\n");
+    builder.append("\n");
+    builder.append(responseMessage);
+
+    return builder;
+  }
+
 
   /**
    * Method to read in a query and split it up correctly
