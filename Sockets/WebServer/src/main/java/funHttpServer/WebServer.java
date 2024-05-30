@@ -108,6 +108,8 @@ class WebServer {
       while (!done) {
         String line = in.readLine();
 
+        // Check if the first line of the request is not HTTP (i.e. HTTPS)
+        // If so, reject it
         if(c == 1) {
           if(line == null || !line.contains("HTTP")) {
             throw new IOException("Non HTTP Request");
@@ -359,7 +361,6 @@ class WebServer {
               result = name + " attacks the darkness with a " + weapon + ", destroying it completely. There is much laughter and mountain dew.";
             }
 
-
             // Generate response
             builder = buildResponse("200 OK", "text/html", result);
           } 
@@ -367,8 +368,6 @@ class WebServer {
         } 
         
         else if (request.contains("badGambler?")) {
-          // This multiplies two numbers, there is NO error handling, so when
-          // wrong data is given this just crashes
           boolean requestOk = true;
 
           Map<String, String> query_pairs = new LinkedHashMap<String, String>();
